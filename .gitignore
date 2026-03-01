@@ -1,0 +1,48 @@
+# Node
+node_modules/
+
+# Build / distribution
+dist/
+build/
+out/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+
+# Environment
+.env
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE / editor
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Coverage / test artifacts
+coverage/
+jest-cache/
+
+# Caches
+.cache/
+.parcel-cache/
+.next/
+.nuxt/
+/.turbo/
+
+# Packaged extension & keys (do not commit .pem/.crx)
+*.pem
+*.crx
+chrome-qr-code.pem
+chrome-qr-code.crx
+
+# Misc
+*.zip

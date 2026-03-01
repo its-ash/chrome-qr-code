@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QR CODE</title>
+    <link rel="stylesheet" href="/src/styles/tailwind.css">
+    <style>
+      html, body {
+        background: transparent;
+        margin: 0;
+        padding: 0;
+        -webkit-font-smoothing: antialiased;
+      }
+      /* ensure the rounded container visually fills the popup */
+      .popup-shell {
+        min-width: 300px;
+        box-sizing: border-box;
+        border-radius: 16px;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body class="bg-transparent text-gray-800 p-0">
+    <div class="popup-shell bg-white shadow-lg">
+      <div class="p-4">
+      <div class="flex items-center gap-3 mb-4">
+        <img src="/icons/logo.svg" alt="logo" class="w-10 h-10" />
+        <h1 class="text-lg font-semibold">QR CODE</h1>
+      </div>
+
+      <div class="grid grid-cols-1 gap-3">
+        <div id="qrcode" class="mx-auto p-2 bg-white rounded-lg shadow w-48 h-48 flex items-center justify-center"></div>
+
+        <label class="text-sm text-gray-600">Text / URL</label>
+        <input id="text" type="text" placeholder="Enter text or URL" class="w-full px-3 py-2 rounded border border-gray-200 focus:outline-none focus:ring-2 focus:ring-teal-400" />
+
+        <div class="flex gap-2 justify-between">
+          <button id="copyBtn" class="flex-1 btn bg-teal-500 text-white px-3 py-2 rounded">Copy</button>
+          <button id="downloadBtn" class="flex-1 btn bg-gray-200 text-gray-800 px-3 py-2 rounded">Download</button>
+        </div>
+      </div>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

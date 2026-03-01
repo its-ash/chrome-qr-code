@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <rect width="128" height="128" rx="20" fill="#111827" />
+  <g transform="translate(24,24)" fill="#10B981">
+    <rect x="0" y="0" width="80" height="80" rx="8" />
+    <rect x="6" y="6" width="20" height="20" fill="#fff" />
+    <rect x="34" y="6" width="20" height="20" fill="#fff" />
+    <rect x="6" y="34" width="20" height="20" fill="#fff" />
+  </g>
+  <text x="64" y="108" fill="#9CA3AF" font-family="Inter, Arial, sans-serif" font-size="12" text-anchor="middle">QR CODE</text>
+</svg>
