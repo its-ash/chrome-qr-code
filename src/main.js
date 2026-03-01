@@ -6,6 +6,7 @@ const qrContainer = $('#qrcode')
 const input = $('#text')
 const copyBtn = $('#copyBtn')
 const downloadBtn = $('#downloadBtn')
+const aboutBtn = $('#aboutBtn')
 
 function renderQR(text) {
   qrContainer.innerHTML = ''
@@ -51,4 +52,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   downloadBtn.addEventListener('click', downloadCanvas)
   copyBtn.addEventListener('click', copyImage)
+  if (aboutBtn) {
+    aboutBtn.addEventListener('click', () => {
+      const url = chrome.runtime.getURL('about.html')
+      chrome.tabs.create({ url })
+    })
+  }
 })
