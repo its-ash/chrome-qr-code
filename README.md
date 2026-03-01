@@ -4,7 +4,7 @@ Minimal Chrome extension that generates a QR code for the current page or any cu
 
 Preview
 
-![QR CODE preview](assets/preview.png)
+![QR CODE preview](/QR-CODE.png)
 
 What it does
 
