@@ -46,3 +46,4 @@ chrome-qr-code.crx
 
 # Misc
 *.zip
+!/site/chrome-qr-code.zip

@@ -1,0 +1,593 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>QR CODE - QR codes for any Chrome tab</title>
+    <meta name="description" content="A Chrome extension that makes a QR code for the current tab or any text. Pick a color and size, then copy it or save it as PNG or SVG. Runs fully on your device." />
+    <meta property="og:title" content="QR CODE - QR codes for any Chrome tab" />
+    <meta property="og:description" content="Open the popup and your page is ready to scan. Style it, then save it as PNG or SVG." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://its-ash.github.io/chrome-qr-code/" />
+    <meta property="og:image" content="https://its-ash.github.io/chrome-qr-code/QR-CODE.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="canonical" href="https://its-ash.github.io/chrome-qr-code/" />
+    <link rel="icon" href="site/favicon.svg" type="image/svg+xml" />
+    <link rel="preload" href="site/fonts/google-sans-flex-latin-wght.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="site/preview.webp" as="image" fetchpriority="high" />
+    <style>
+      @font-face {
+        font-family: 'Google Sans Flex';
+        font-style: normal;
+        font-display: swap;
+        font-weight: 100 1000;
+        src: url('site/fonts/google-sans-flex-latin-wght.woff2') format('woff2-variations');
+      }
+
+      :root {
+        color-scheme: light dark;
+        --font: 'Google Sans Flex', 'Google Sans', Roboto, system-ui, -apple-system, 'Segoe UI', sans-serif;
+        --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+        --primary: #0b57d0;
+        --on-primary: #fdfdfe;
+        --primary-container: #d3e3fd;
+        --on-primary-container: #041e49;
+        --surface: #fdfdfe;
+        --surface-container: #f0f4f9;
+        --surface-container-high: #e9eef6;
+        --on-surface: #1f1f1f;
+        --on-surface-variant: #444746;
+        --outline: #747775;
+        --outline-variant: #c4c7c5;
+        --night: #131314;
+        --on-night: #e3e3e3;
+        --on-night-variant: #c4c7c5;
+        --radius-lg: 2rem;
+        --radius-md: 1.5rem;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --primary: #a8c7fa;
+          --on-primary: #062e6f;
+          --primary-container: #0842a0;
+          --on-primary-container: #d3e3fd;
+          --surface: #1e1f20;
+          --surface-container: #282a2c;
+          --surface-container-high: #333537;
+          --on-surface: #e3e3e3;
+          --on-surface-variant: #c4c7c5;
+          --outline: #8e918f;
+          --outline-variant: #444746;
+          --night: #0e0e0f;
+        }
+      }
+
+      *, *::before, *::after { box-sizing: border-box; }
+
+      html { scroll-behavior: smooth; scroll-padding-top: 5rem; }
+
+      body {
+        margin: 0;
+        background: var(--surface);
+        color: var(--on-surface);
+        font-family: var(--font);
+        line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      img { display: block; max-inline-size: 100%; block-size: auto; }
+
+      a { color: inherit; }
+
+      :focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; border-radius: 0.5rem; }
+
+      .wrap { inline-size: min(100% - 2rem, 72rem); margin-inline: auto; }
+
+      .icon { inline-size: 1.25rem; block-size: 1.25rem; fill: currentColor; flex: none; }
+
+      /* nav */
+      .nav {
+        position: sticky;
+        inset-block-start: 0;
+        z-index: 10;
+        background: color-mix(in oklab, var(--surface) 82%, transparent);
+        backdrop-filter: blur(14px) saturate(1.4);
+        border-block-end: 1px solid color-mix(in oklab, var(--outline-variant) 55%, transparent);
+      }
+
+      .nav-in {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        block-size: 4rem;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 0.625rem;
+        font-weight: 500;
+        text-decoration: none;
+      }
+
+      .brand img { inline-size: 1.75rem; block-size: 1.75rem; }
+
+      .links {
+        display: flex;
+        gap: 0.25rem;
+        margin: 0 0 0 auto;
+        padding: 0;
+        list-style: none;
+      }
+
+      .links a {
+        display: block;
+        padding: 0.5rem 0.875rem;
+        border-radius: 999px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--on-surface-variant);
+        text-decoration: none;
+        transition: background-color 150ms ease, color 150ms ease;
+      }
+
+      .nav-end { display: flex; align-items: center; gap: 0.5rem; }
+
+      .icon-link {
+        display: grid;
+        place-items: center;
+        inline-size: 2.5rem;
+        block-size: 2.5rem;
+        border-radius: 999px;
+        color: var(--on-surface-variant);
+        transition: background-color 150ms ease;
+      }
+
+      /* buttons */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        min-block-size: 2.75rem;
+        padding-inline: 1.25rem 1.5rem;
+        border-radius: 999px;
+        font: 500 0.9375rem/1 var(--font);
+        text-decoration: none;
+        white-space: nowrap;
+        transition: transform 160ms var(--ease-out), background-color 160ms ease, box-shadow 160ms ease;
+      }
+
+      .btn:active { transform: scale(0.97); }
+      .btn-sm { min-block-size: 2.5rem; padding-inline: 1rem 1.25rem; font-size: 0.875rem; }
+      .btn-filled { background: var(--primary); color: var(--on-primary); }
+      .btn-outlined { padding-inline: 1.5rem; color: var(--primary); box-shadow: inset 0 0 0 1px var(--outline); }
+
+      @media (hover: hover) and (pointer: fine) {
+        .links a:hover { background: color-mix(in oklab, var(--on-surface) 8%, transparent); color: var(--on-surface); }
+        .icon-link:hover { background: color-mix(in oklab, var(--on-surface) 8%, transparent); }
+        .btn-filled:hover { background: color-mix(in oklab, var(--primary), var(--on-primary) 10%); box-shadow: 0 1px 3px color-mix(in oklab, var(--primary) 40%, transparent); }
+        .btn-outlined:hover { background: color-mix(in oklab, var(--primary) 8%, transparent); }
+      }
+
+      /* hero */
+      .hero {
+        display: grid;
+        grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+        align-items: center;
+        gap: clamp(2rem, 5vw, 4.5rem);
+        padding-block: clamp(2.5rem, 7vw, 5.5rem) clamp(3rem, 8vw, 6rem);
+      }
+
+      h1, h2, h3 { text-wrap: balance; }
+
+      h1 {
+        margin: 0 0 1.25rem;
+        font-size: clamp(2.5rem, 1.4rem + 3.6vw, 4.25rem);
+        line-height: 1.04;
+        font-weight: 500;
+        letter-spacing: -0.035em;
+      }
+
+      .lead {
+        margin: 0;
+        max-inline-size: 34ch;
+        font-size: clamp(1.0625rem, 1rem + 0.3vw, 1.25rem);
+        color: var(--on-surface-variant);
+        text-wrap: pretty;
+      }
+
+      .actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-block-start: 2rem; }
+
+      .shot {
+        margin: 0;
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        background: var(--surface-container-high);
+      }
+
+      h2 {
+        margin: 0 0 1rem;
+        font-size: clamp(1.75rem, 1.3rem + 1.6vw, 2.5rem);
+        line-height: 1.12;
+        font-weight: 500;
+        letter-spacing: -0.025em;
+      }
+
+      h3 {
+        margin: 0 0 0.375rem;
+        font-size: 1.125rem;
+        line-height: 1.3;
+        font-weight: 500;
+        letter-spacing: -0.005em;
+      }
+
+      .body { margin: 0; max-inline-size: 60ch; color: var(--on-surface-variant); text-wrap: pretty; }
+
+      section { padding-block: clamp(3rem, 8vw, 6rem); }
+
+      /* bento */
+      .bento {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 1rem;
+        margin-block-start: 2.5rem;
+      }
+
+      .cell {
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+        padding: 1.5rem;
+        border-radius: var(--radius-md);
+        background: var(--surface-container);
+        overflow: hidden;
+      }
+
+      .cell p { margin: 0; color: var(--on-surface-variant); font-size: 0.9375rem; text-wrap: pretty; }
+
+      .cell-style { grid-column: span 2; grid-row: span 2; }
+      .cell-style img { margin-block-start: auto; border-radius: 1rem; box-shadow: 0 1px 2px color-mix(in oklab, var(--on-surface) 12%, transparent), 0 8px 24px color-mix(in oklab, var(--primary) 12%, transparent); }
+
+      .cell-tab { grid-column: 3; grid-row: 1; background: var(--primary-container); }
+      .cell-copy { grid-column: 3; grid-row: 2; }
+      .cell-tab p, .cell-tab h3 { color: var(--on-primary-container); }
+
+      .cell-svg { grid-column: 4; grid-row: 1 / span 2; background: var(--surface-container-high); }
+      .cell-svg figure { margin: auto 0 0; }
+      .cell-svg img { inline-size: 100%; aspect-ratio: 1; border-radius: 1rem; }
+      .cell-svg figcaption { margin-block-start: 0.75rem; font-size: 0.8125rem; color: var(--on-surface-variant); }
+
+      .cell-dark {
+        grid-column: 1 / -1;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 18rem);
+        align-items: center;
+        gap: 2rem;
+        padding: 2rem 2rem 0 2.5rem;
+        background: var(--night);
+        color: var(--on-night);
+      }
+
+      .cell-dark p { color: var(--on-night-variant); max-inline-size: 44ch; }
+      .cell-dark div { padding-block-end: 2rem; }
+      .cell-dark img { inline-size: 100%; block-size: 19rem; object-fit: cover; object-position: top; border-radius: 1.25rem 1.25rem 0 0; }
+
+      .glyph {
+        display: grid;
+        place-items: center;
+        inline-size: 2.75rem;
+        block-size: 2.75rem;
+        border-radius: 999px;
+        background: var(--surface);
+        color: var(--primary);
+      }
+
+      .cell-tab .glyph { background: color-mix(in oklab, var(--surface) 70%, transparent); color: var(--on-primary-container); }
+
+      /* privacy */
+      .band {
+        padding: clamp(2rem, 5vw, 3.5rem);
+        border-radius: var(--radius-lg);
+        background: var(--surface-container);
+      }
+
+      .band h2 { max-inline-size: 18ch; font-size: clamp(2rem, 1.3rem + 2.6vw, 3.25rem); }
+
+      .facts {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1.5rem 2rem;
+        margin: clamp(2rem, 5vw, 3rem) 0 0;
+      }
+
+      .facts div { display: grid; grid-template-columns: auto 1fr; gap: 0.25rem 0.875rem; align-content: start; }
+      .facts .icon { grid-row: span 2; inline-size: 1.5rem; block-size: 1.5rem; color: var(--primary); margin-block-start: 0.125rem; }
+      .facts dt { font-weight: 500; }
+      .facts dd { margin: 0; color: var(--on-surface-variant); font-size: 0.9375rem; }
+
+      /* install */
+      .install {
+        display: grid;
+        grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+        gap: clamp(2rem, 5vw, 4.5rem);
+        align-items: start;
+      }
+
+      .install .actions { margin-block-start: 1.5rem; }
+
+      .steps {
+        display: grid;
+        gap: 0.75rem;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        counter-reset: step;
+      }
+
+      .steps li {
+        display: grid;
+        grid-template-columns: 2.5rem 1fr;
+        gap: 0.125rem 1rem;
+        padding: 1.25rem 1.5rem;
+        border-radius: var(--radius-md);
+        box-shadow: inset 0 0 0 1px var(--outline-variant);
+        counter-increment: step;
+      }
+
+      .steps li::before {
+        content: counter(step);
+        grid-row: span 2;
+        display: grid;
+        place-items: center;
+        inline-size: 2.5rem;
+        block-size: 2.5rem;
+        border-radius: 999px;
+        background: var(--primary-container);
+        color: var(--on-primary-container);
+        font-weight: 600;
+      }
+
+      .steps strong { font-weight: 500; }
+      .steps span { color: var(--on-surface-variant); font-size: 0.9375rem; }
+
+      code {
+        font: 0.875em ui-monospace, 'SF Mono', Menlo, monospace;
+        padding: 0.125rem 0.375rem;
+        border-radius: 0.375rem;
+        background: color-mix(in oklab, var(--on-surface) 8%, transparent);
+      }
+
+      /* footer */
+      .foot {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 1rem 1.5rem;
+        padding-block: 2rem 2.5rem;
+        border-block-start: 1px solid var(--outline-variant);
+        font-size: 0.875rem;
+        color: var(--on-surface-variant);
+      }
+
+      .foot .brand { color: var(--on-surface); }
+      .foot a:not(.brand) { text-decoration: none; }
+      .foot .end { margin-inline-start: auto; display: flex; gap: 1.5rem; }
+
+      @media (hover: hover) and (pointer: fine) {
+        .foot a:not(.brand):hover { color: var(--on-surface); text-decoration: underline; }
+      }
+
+      /* motion */
+      @media (prefers-reduced-motion: no-preference) {
+        .rise { animation: rise 600ms var(--ease-out) both; animation-delay: calc(var(--i, 0) * 70ms); }
+
+        @supports (animation-timeline: view()) {
+          .reveal {
+            animation: rise linear both;
+            animation-timeline: view();
+            animation-range: entry 0% entry 40%;
+          }
+        }
+      }
+
+      @keyframes rise {
+        from { opacity: 0; transform: translateY(14px); }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        html { scroll-behavior: auto; }
+        .btn:active { transform: none; }
+      }
+
+      @media (prefers-reduced-transparency: reduce) {
+        .nav { background: var(--surface); backdrop-filter: none; }
+      }
+
+      @media (forced-colors: active) {
+        .btn, .cell, .band { border: 1px solid CanvasText; }
+      }
+
+      /* responsive */
+      @media (max-width: 1023px) {
+        .bento { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .cell-tab, .cell-copy { grid-column: auto; grid-row: auto; }
+        .cell-style, .cell-svg { grid-column: span 2; grid-row: auto; }
+        .cell-svg { display: grid; grid-template-columns: minmax(0, 1fr) 10rem; align-items: end; }
+        .cell-svg figure { margin: 0; grid-row: span 2; grid-column: 2; }
+        .facts { grid-template-columns: minmax(0, 1fr); }
+      }
+
+      @media (max-width: 767px) {
+        .links { display: none; }
+        .nav-end { margin-inline-start: auto; }
+        .hero, .install { grid-template-columns: minmax(0, 1fr); }
+        .bento { grid-template-columns: minmax(0, 1fr); }
+        .cell-style, .cell-svg, .cell-dark { grid-column: auto; }
+        .cell-svg { grid-template-columns: minmax(0, 1fr); }
+        .cell-svg figure { grid-row: auto; grid-column: auto; max-inline-size: 12rem; }
+        .cell-dark { grid-template-columns: minmax(0, 1fr); padding: 1.5rem 1.5rem 0; }
+        .cell-dark div { padding-block-end: 0; }
+        .cell-dark img { max-inline-size: 18rem; block-size: 17rem; margin-inline: auto; }
+        .foot .end { margin-inline-start: 0; }
+      }
+    </style>
+  </head>
+  <body>
+    <svg width="0" height="0" style="position: absolute" aria-hidden="true"><symbol id="i-download" viewBox="0 -960 960 960"><path d="M469-327q-5-2-10-7L308-485q-9-9.27-8.5-21.64.5-12.36 9.11-21.36 9.39-9 21.89-9t21.5 9l98 99v-341q0-12.75 8.68-21.38 8.67-8.62 21.5-8.62 12.82 0 21.32 8.62 8.5 8.63 8.5 21.38v341l99-99q8.8-9 20.9-8.5 12.1.5 21.49 9.5 8.61 9 8.61 21.5t-9 21.5L501-334q-5 5-10.13 7-5.14 2-11 2-5.87 0-10.87-2ZM220-160q-24 0-42-18t-18-42v-113q0-12.75 8.68-21.38 8.67-8.62 21.5-8.62 12.82 0 21.32 8.62 8.5 8.63 8.5 21.38v113h520v-113q0-12.75 8.68-21.38 8.67-8.62 21.5-8.62 12.82 0 21.32 8.62 8.5 8.63 8.5 21.38v113q0 24-18 42t-42 18H220Z"/></symbol><symbol id="i-tab" viewBox="0 -960 960 960"><path d="M140-220h680v-347H554q-12.75 0-21.37-8.63Q524-584.25 524-597v-143H140v520Zm0 60q-24 0-42-18t-18-42v-520q0-24 18-42t42-18h680q24 0 42 18t18 42v520q0 24-18 42t-42 18H140Zm0-60v-520 520Z"/></symbol><symbol id="i-content_copy" viewBox="0 -960 960 960"><path d="M300-200q-24 0-42-18t-18-42v-560q0-24 18-42t42-18h440q24 0 42 18t18 42v560q0 24-18 42t-42 18H300Zm0-60h440v-560H300v560ZM180-80q-24 0-42-18t-18-42v-590q0-12.75 8.68-21.38 8.67-8.62 21.5-8.62 12.82 0 21.32 8.62 8.5 8.63 8.5 21.38v590h470q12.75 0 21.38 8.68 8.62 8.67 8.62 21.5 0 12.82-8.62 21.32Q662.75-80 650-80H180Zm120-180v-560 560Z"/></symbol><symbol id="i-lock" viewBox="0 -960 960 960"><path d="M220-80q-24.75 0-42.37-17.63Q160-115.25 160-140v-434q0-24.75 17.63-42.38Q195.25-634 220-634h70v-96q0-78.85 55.61-134.42Q401.21-920 480.11-920q78.89 0 134.39 55.58Q670-808.85 670-730v96h70q24.75 0 42.38 17.62Q800-598.75 800-574v434q0 24.75-17.62 42.37Q764.75-80 740-80H220Zm0-60h520v-434H220v434Zm314.5-162.03Q557-324.06 557-355q0-30-22.67-54.5t-54.5-24.5q-31.83 0-54.33 24.5t-22.5 55q0 30.5 22.67 52.5t54.5 22q31.83 0 54.33-22.03ZM350-634h260v-96q0-54.17-37.88-92.08-37.88-37.92-92-37.92T388-822.08q-38 37.91-38 92.08v96ZM220-140v-434 434Z"/></symbol><symbol id="i-cloud_off" viewBox="0 -960 960 960"><path d="M248-171q-88 0-148-59T40-377q0-80 50.5-134T217-577q2-14 6.5-31.5T236-640L91-785q-9-9-9-21t9-21q9-9 21-9t21 9l707 707q9 9 9 21t-9 21q-9 9-21.5 9T797-78l-94-93H248Zm0-60h397L285-591q-11 15-14.5 34t-3.5 37h-19q-62 0-105 39.5t-43 101q0 61.5 43 105T248-231Zm216-181Zm390 210-47-47q25-17 39-38t14-50q0-43-31-73.5T755-441h-67v-81q0-88-61-147.5T478.47-729q-28.47 0-60.97 9T358-691l-42-42q36-29 77.5-42.5T478-789q111 0 190.5 79T748-520v21q72-1 122 45t50 117q0 35-16.5 73.5T854-202ZM583-470Z"/></symbol><symbol id="i-save" viewBox="0 -960 960 960"><path d="M180-120q-24 0-42-18t-18-42v-600q0-24 18-42t42-18h478q12.44 0 23.72 5T701-822l121 121q8 8 13 19.28 5 11.28 5 23.72v478q0 24-18 42t-42 18H180Zm600-536L656-780H180v600h600v-476ZM553.5-275.26q30.5-30.27 30.5-73.5 0-43.24-30.26-73.74-30.27-30.5-73.5-30.5-43.24 0-73.74 30.26-30.5 30.27-30.5 73.5 0 43.24 30.26 73.74 30.27 30.5 73.5 30.5 43.24 0 73.74-30.26ZM263-584h298q12.75 0 21.38-8.63Q591-601.25 591-614v-83q0-12.75-8.62-21.38Q573.75-727 561-727H263q-12.75 0-21.37 8.62Q233-709.75 233-697v83q0 12.75 8.63 21.37Q250.25-584 263-584Zm-83-72v476-600 124Z"/></symbol><symbol id="i-github" viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></symbol></svg>
+
+    <header class="nav">
+      <div class="wrap nav-in">
+        <a class="brand" href="#top" aria-label="QR CODE home">
+          <img src="site/logo.svg" alt="" width="28" height="28" />
+          <span>QR CODE</span>
+        </a>
+        <ul class="links">
+          <li><a href="#features">Features</a></li>
+          <li><a href="#privacy">Privacy</a></li>
+          <li><a href="#install">Install</a></li>
+        </ul>
+        <div class="nav-end">
+          <a class="icon-link" href="https://github.com/its-ash/chrome-qr-code" aria-label="Source code on GitHub">
+            <svg class="icon" aria-hidden="true"><use href="#i-github" /></svg>
+          </a>
+          <a class="btn btn-filled btn-sm" href="site/chrome-qr-code.zip" download>
+            <svg class="icon" aria-hidden="true"><use href="#i-download" /></svg>
+            Download
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <main id="top">
+      <div class="wrap hero">
+        <div>
+          <h1 class="rise">A QR code for every tab.</h1>
+          <p class="lead rise" style="--i: 1">Open the popup and your page is ready to scan. Style it, then save it as PNG or SVG.</p>
+          <div class="actions rise" style="--i: 2">
+            <a class="btn btn-filled" href="site/chrome-qr-code.zip" download>
+              <svg class="icon" aria-hidden="true"><use href="#i-download" /></svg>
+              Download
+            </a>
+            <a class="btn btn-outlined" href="https://github.com/its-ash/chrome-qr-code">View source</a>
+          </div>
+        </div>
+        <figure class="shot rise" style="--i: 2">
+          <img src="site/preview.webp" width="1280" height="800" fetchpriority="high" alt="The QR CODE popup in light and dark theme. Each shows a QR code with four colored dots in the center, a text field, and Copy and Download buttons." />
+        </figure>
+      </div>
+
+      <section id="features" aria-labelledby="features-title">
+        <div class="wrap">
+          <h2 id="features-title">Small popup, full control</h2>
+          <p class="body">Everything happens in one window that opens from your toolbar.</p>
+
+          <div class="bento">
+            <article class="cell cell-style reveal">
+              <div>
+                <h3>Make it yours</h3>
+                <p>Pick a color, error correction level, and export size. Your choices are kept for next time.</p>
+              </div>
+              <img src="site/style-panel.webp" width="1200" height="940" loading="lazy" alt="The style panel next to a blue QR code, with color swatches, error correction, export size, file format, and a center dots switch." />
+            </article>
+
+            <article class="cell cell-tab reveal">
+              <span class="glyph"><svg class="icon" aria-hidden="true"><use href="#i-tab" /></svg></span>
+              <div>
+                <h3>Ready on open</h3>
+                <p>The address of the current tab fills in by itself. Type to replace it with any text.</p>
+              </div>
+            </article>
+
+            <article class="cell cell-copy reveal">
+              <span class="glyph"><svg class="icon" aria-hidden="true"><use href="#i-content_copy" /></svg></span>
+              <div>
+                <h3>Copy in one click</h3>
+                <p>Put the image on your clipboard, then paste it into a doc, chat, or slide.</p>
+              </div>
+            </article>
+            <article class="cell cell-svg reveal">
+              <div>
+                <h3>PNG or SVG</h3>
+                <p>Sharp PNG files up to 2048 px, or a vector SVG for print.</p>
+              </div>
+              <figure>
+                <img src="site/qr-repo.svg" width="512" height="512" loading="lazy" alt="A blue QR code made with the extension. It links to the GitHub repository." />
+                <figcaption>Scan to open this project on GitHub.</figcaption>
+              </figure>
+            </article>
+
+
+            <article class="cell cell-dark reveal">
+              <div>
+                <h3>Light and dark</h3>
+                <p>The popup follows your system theme. The code stays dark on light, so every phone camera can read it.</p>
+              </div>
+              <img src="site/dark-popup.webp" width="640" height="888" loading="lazy" alt="The popup in dark theme, showing a green QR code for the text Meet at Gate 14, 6:40 pm." />
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="privacy" aria-labelledby="privacy-title">
+        <div class="wrap">
+          <div class="band reveal">
+            <h2 id="privacy-title">Your links never leave your device.</h2>
+            <p class="body">Every code is drawn inside the popup. There is no account, no analytics, and no server.</p>
+            <dl class="facts">
+              <div>
+                <svg class="icon" aria-hidden="true"><use href="#i-lock" /></svg>
+                <dt>One permission</dt>
+                <dd><code>activeTab</code>, used only when you open the popup.</dd>
+              </div>
+              <div>
+                <svg class="icon" aria-hidden="true"><use href="#i-cloud_off" /></svg>
+                <dt>No network calls</dt>
+                <dd>The QR code is made in your browser, so it works offline.</dd>
+              </div>
+              <div>
+                <svg class="icon" aria-hidden="true"><use href="#i-save" /></svg>
+                <dt>Local settings</dt>
+                <dd>Your style choices stay in the popup's local storage.</dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+      </section>
+
+      <section id="install" aria-labelledby="install-title">
+        <div class="wrap install">
+          <div class="reveal">
+            <h2 id="install-title">Install in a minute</h2>
+            <p class="body">Load the extension in Chrome or any Chromium browser, such as Edge, Brave, or Arc.</p>
+            <div class="actions">
+              <a class="btn btn-filled" href="site/chrome-qr-code.zip" download>
+                <svg class="icon" aria-hidden="true"><use href="#i-download" /></svg>
+                Download
+              </a>
+            </div>
+          </div>
+          <ol class="steps reveal">
+            <li><strong>Unzip the download</strong><span>You get a folder named <code>dist</code>.</span></li>
+            <li><strong>Open <code>chrome://extensions</code></strong><span>Turn on Developer mode in the top-right corner.</span></li>
+            <li><strong>Select Load unpacked</strong><span>Choose the <code>dist</code> folder, then pin QR CODE to your toolbar.</span></li>
+          </ol>
+        </div>
+      </section>
+    </main>
+
+    <footer class="wrap foot">
+      <a class="brand" href="#top">
+        <img src="site/logo.svg" alt="" width="28" height="28" />
+        <span>QR CODE</span>
+      </a>
+      <span>MIT License</span>
+      <div class="end">
+        <a href="https://github.com/its-ash/chrome-qr-code">GitHub</a>
+        <a href="https://github.com/its-ash/chrome-qr-code/issues">Report an issue</a>
+      </div>
+    </footer>
+  </body>
+</html>

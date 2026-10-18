@@ -3,6 +3,8 @@ run:
 
 build:
 	npm run build
+	mkdir -p site
+	cp chrome-qr-code.zip site/chrome-qr-code.zip
 
 deploy: build
 	git checkout main
