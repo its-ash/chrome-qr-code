@@ -3,45 +3,49 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>QR CODE</title>
-    <link rel="stylesheet" href="/src/styles/tailwind.css">
-    <style>
-      html, body {
-        background: transparent;
-        margin: 0;
-        padding: 0;
-        -webkit-font-smoothing: antialiased;
-      }
-      /* ensure the rounded container visually fills the popup */
-      .popup-shell {
-        min-width: 300px;
-        box-sizing: border-box;
-        border-radius: 16px;
-        overflow: hidden;
-      }
-    </style>
+    <meta name="color-scheme" content="light dark" />
+    <title>QR Code</title>
+    <link rel="stylesheet" href="/src/styles/tailwind.css" />
   </head>
-  <body class="bg-transparent text-gray-800 p-0">
-    <div class="popup-shell bg-white shadow-lg">
-      <div class="p-4">
-      <div class="flex items-center gap-3 mb-4">
-        <img src="/icons/logo.svg" alt="logo" class="w-10 h-10" />
-        <h1 class="text-lg font-semibold">QR CODE</h1>
-      </div>
+  <body>
+    <main class="popup" aria-labelledby="title">
+      <header class="popup-head">
+        <img src="/icons/logo.svg" alt="" width="24" height="24" />
+        <h1 id="title">QR code</h1>
+      </header>
 
-      <div class="grid grid-cols-1 gap-3">
-        <div id="qrcode" class="mx-auto p-2 bg-white rounded-lg shadow w-48 h-48 flex items-center justify-center"></div>
-
-        <label class="text-sm text-gray-600">Text / URL</label>
-        <input id="text" type="text" placeholder="Enter text or URL" class="w-full px-3 py-2 rounded border border-gray-200 focus:outline-none focus:ring-2 focus:ring-teal-400" />
-
-        <div class="flex gap-2 justify-between">
-          <button id="copyBtn" class="flex-1 btn bg-teal-500 text-white px-3 py-2 rounded">Copy</button>
-          <button id="downloadBtn" class="flex-1 btn bg-gray-200 text-gray-800 px-3 py-2 rounded">Download</button>
+      <section class="stage" aria-label="QR code preview">
+        <div id="qrcode" class="tile" data-state="loading">
+          <canvas id="qrCanvas" role="img" aria-label="QR code"></canvas>
+          <div class="tile-msg" id="tileMsg" hidden>
+            <md-icon data-icon="qr_code_2" id="tileIcon"></md-icon>
+            <p id="tileText">Enter text or a link to make a code.</p>
+          </div>
         </div>
+      </section>
+
+      <md-outlined-text-field
+        id="text"
+        class="field"
+        label="Text or URL"
+        error-text="Shorten the text to fit in a QR code."
+        autocomplete="off"
+        spellcheck="false"
+      ></md-outlined-text-field>
+
+      <div class="actions">
+        <md-outlined-button id="copyBtn" has-icon disabled>
+          <md-icon slot="icon" data-icon="content_copy"></md-icon>
+          <span id="copyLabel">Copy</span>
+        </md-outlined-button>
+        <md-filled-button id="downloadBtn" has-icon disabled>
+          <md-icon slot="icon" data-icon="download"></md-icon>
+          Download
+        </md-filled-button>
       </div>
-      </div>
-    </div>
+
+      <p id="status" class="sr-only" aria-live="polite"></p>
+    </main>
 
     <script type="module" src="/src/main.js"></script>
   </body>

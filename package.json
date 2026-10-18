@@ -2,10 +2,15 @@
   "name": "chrome-qr-code",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24.21.0"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build && npm run postbuild",
     "postbuild": "rm -f chrome-qr-code.zip && zip -r chrome-qr-code.zip dist",
+    "start": "vite preview --port 5173",
     "preview": "vite preview --port 5173"
   },
   "devDependencies": {
@@ -15,6 +20,9 @@
     "vite": "^5.2.0"
   },
   "dependencies": {
+    "@fontsource-variable/google-sans-flex": "5.3.1",
+    "@material-symbols/svg-400": "0.47.6",
+    "@material/web": "2.5.0",
     "qrcode": "^1.5.1"
   }
 }

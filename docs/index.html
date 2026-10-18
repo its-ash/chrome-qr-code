@@ -3,37 +3,263 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>About — QR CODE</title>
+    <meta name="color-scheme" content="light dark" />
+    <meta name="description" content="Generate a QR code for the current page or any custom text. Minimal, local, and fast." />
+    <title>About - QR CODE</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="preload" href="fonts/google-sans-flex-latin-wght.woff2" as="font" type="font/woff2" crossorigin />
     <style>
-      body { font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Arial; background:#f8fafc; color:#0f172a; padding:24px; }
-      .card { max-width:780px; margin:32px auto; background:#fff; border-radius:12px; box-shadow:0 6px 18px rgba(2,6,23,0.08); padding:20px }
-      h1 { margin:0 0 8px 0 }
-      p { margin:8px 0 }
-      .actions { margin-top:16px }
-      a.button { display:inline-block; background:#0ea5a4; color:white; padding:10px 14px; border-radius:8px; text-decoration:none }
-      a.secondary { display:inline-block; margin-left:12px; padding:8px 12px; border-radius:8px; background:#eef2ff; color:#3730a3; text-decoration:none }
-      .note { margin-top:12px; color:#475569; font-size:13px }
+      @font-face {
+        font-family: 'Google Sans Flex';
+        font-style: normal;
+        font-display: swap;
+        font-weight: 100 1000;
+        src: url('fonts/google-sans-flex-latin-wght.woff2') format('woff2-variations');
+      }
+
+      :root {
+        color-scheme: light dark;
+        --font: 'Google Sans Flex', 'Google Sans', Roboto, system-ui, -apple-system, 'Segoe UI', sans-serif;
+        --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+        --primary: #0b57d0;
+        --on-primary: #fdfdfe;
+        --primary-container: #d3e3fd;
+        --on-primary-container: #041e49;
+        --surface: #fdfdfe;
+        --surface-container: #f0f4f9;
+        --on-surface: #1f1f1f;
+        --on-surface-variant: #444746;
+        --outline: #747775;
+        --outline-variant: #c4c7c5;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --primary: #a8c7fa;
+          --on-primary: #062e6f;
+          --primary-container: #0842a0;
+          --on-primary-container: #d3e3fd;
+          --surface: #1e1f20;
+          --surface-container: #282a2c;
+          --on-surface: #e3e3e3;
+          --on-surface-variant: #c4c7c5;
+          --outline: #8e918f;
+          --outline-variant: #444746;
+        }
+      }
+
+      *, *::before, *::after { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        background: var(--surface);
+        color: var(--on-surface);
+        font-family: var(--font);
+        line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .wrap {
+        inline-size: min(100% - 2rem, 72rem);
+        margin-inline: auto;
+      }
+
+      .bar {
+        display: flex;
+        align-items: center;
+        gap: 0.625rem;
+        block-size: 4rem;
+        font-weight: 500;
+      }
+
+      .bar img { inline-size: 1.75rem; block-size: 1.75rem; }
+
+      .hero {
+        display: grid;
+        grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+        align-items: center;
+        gap: clamp(2rem, 5vw, 4rem);
+        padding-block: clamp(2rem, 6vw, 5rem);
+      }
+
+      h1 {
+        margin: 0 0 1rem;
+        font-size: clamp(2.5rem, 1.6rem + 3vw, 4rem);
+        line-height: 1.05;
+        font-weight: 600;
+        letter-spacing: -0.03em;
+      }
+
+      .lead {
+        margin: 0;
+        max-inline-size: 38ch;
+        font-size: 1.125rem;
+        color: var(--on-surface-variant);
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin-block-start: 2rem;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        min-block-size: 2.75rem;
+        padding-inline: 1.25rem 1.5rem;
+        border-radius: 999px;
+        font: 500 0.9375rem/1 var(--font);
+        text-decoration: none;
+        white-space: nowrap;
+        transition: transform 160ms var(--ease-out), background-color 160ms ease, box-shadow 160ms ease;
+      }
+
+      .btn svg { inline-size: 1.25rem; block-size: 1.25rem; fill: currentColor; }
+      .btn:active { transform: scale(0.97); }
+      .btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+
+      .btn-filled { background: var(--primary); color: var(--on-primary); }
+      .btn-outlined { color: var(--primary); box-shadow: inset 0 0 0 1px var(--outline); }
+
+      @media (hover: hover) and (pointer: fine) {
+        .btn-filled:hover { background: color-mix(in oklab, var(--primary), var(--on-primary) 10%); box-shadow: 0 1px 3px color-mix(in oklab, var(--primary) 40%, transparent); }
+        .btn-outlined:hover { background: color-mix(in oklab, var(--primary) 8%, transparent); }
+      }
+
+      .shot {
+        margin: 0;
+        border-radius: 1.75rem;
+        overflow: hidden;
+        background: var(--surface-container);
+      }
+
+      .shot img { display: block; inline-size: 100%; block-size: auto; }
+
+      .features { padding-block: 1rem clamp(3rem, 8vw, 6rem); }
+
+      h2 {
+        margin: 0 0 2rem;
+        font-size: 1.75rem;
+        line-height: 1.2;
+        font-weight: 500;
+        letter-spacing: -0.015em;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
+        gap: 2rem 1.5rem;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .grid li { display: grid; gap: 0.875rem; align-content: start; }
+
+      .glyph {
+        display: grid;
+        place-items: center;
+        inline-size: 3rem;
+        block-size: 3rem;
+        border-radius: 999px;
+        background: var(--primary-container);
+        color: var(--on-primary-container);
+      }
+
+      .glyph svg { inline-size: 1.5rem; block-size: 1.5rem; fill: currentColor; }
+
+      .grid p { margin: 0; max-inline-size: 30ch; color: var(--on-surface-variant); }
+
+      .note {
+        display: flex;
+        gap: 0.75rem;
+        margin-block-start: clamp(3rem, 6vw, 4rem);
+        padding: 1.25rem 1.5rem;
+        border-radius: 1rem;
+        background: var(--surface-container);
+        color: var(--on-surface-variant);
+        font-size: 0.875rem;
+      }
+
+      .note svg { flex: none; inline-size: 1.25rem; block-size: 1.25rem; fill: currentColor; margin-block-start: 0.0625rem; }
+      .note p { margin: 0; max-inline-size: 70ch; }
+
+      code {
+        font: 0.875em ui-monospace, 'SF Mono', Menlo, monospace;
+        padding: 0.125rem 0.375rem;
+        border-radius: 0.375rem;
+        background: color-mix(in oklab, var(--on-surface) 8%, transparent);
+      }
+
+      @media (max-width: 767px) {
+        .hero { grid-template-columns: minmax(0, 1fr); }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .btn { transition: background-color 160ms ease; }
+        .btn:active { transform: none; }
+      }
+
+      @media (forced-colors: active) {
+        .btn { border: 1px solid ButtonText; }
+      }
     </style>
   </head>
   <body>
-    <div class="card">
-      <h1>QR CODE</h1>
-      <p>Generate a QR code for the current page or any custom text instantly. Minimal, local, and fast — built with Tailwind for a compact popup.</p>
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="i-tab" viewBox="0 -960 960 960"><path d="M140-220h680v-347H554q-12.75 0-21.37-8.63Q524-584.25 524-597v-143H140v520Zm0 60q-24 0-42-18t-18-42v-520q0-24 18-42t42-18h680q24 0 42 18t18 42v520q0 24-18 42t-42 18H140Zm0-60v-520 520Z"/></symbol><symbol id="i-edit_note" viewBox="0 -960 960 960"><path d="M190-410q-12.75 0-21.37-8.68-8.63-8.67-8.63-21.5 0-12.82 8.63-21.32 8.62-8.5 21.37-8.5h240q12.75 0 21.38 8.68 8.62 8.67 8.62 21.5 0 12.82-8.62 21.32-8.63 8.5-21.38 8.5H190Zm0-165q-12.75 0-21.37-8.68-8.63-8.67-8.63-21.5 0-12.82 8.63-21.32 8.62-8.5 21.37-8.5h410q12.75 0 21.38 8.68 8.62 8.67 8.62 21.5 0 12.82-8.62 21.32-8.63 8.5-21.38 8.5H190Zm0-165q-12.75 0-21.37-8.68-8.63-8.67-8.63-21.5 0-12.82 8.63-21.32 8.62-8.5 21.37-8.5h410q12.75 0 21.38 8.68 8.62 8.67 8.62 21.5 0 12.82-8.62 21.32-8.63 8.5-21.38 8.5H190Zm330 550v-81q0-5.57 2-10.78 2-5.22 7-10.22l211.61-210.77q9.11-9.12 20.25-13.18Q772-520 783-520q12 0 23 4.5t20 13.5l37 37q9 9 13 20t4 22q0 11-4.5 22.5t-13.58 20.62L652-169q-5 5-10.22 7-5.21 2-10.78 2h-81q-12.75 0-21.37-8.63Q520-177.25 520-190Zm300-233-37-37 37 37ZM580-220h38l121-122-18-19-19-18-122 121v38Zm141-141-19-18 37 37-18-19Z"/></symbol><symbol id="i-download" viewBox="0 -960 960 960"><path d="M469-327q-5-2-10-7L308-485q-9-9.27-8.5-21.64.5-12.36 9.11-21.36 9.39-9 21.89-9t21.5 9l98 99v-341q0-12.75 8.68-21.38 8.67-8.62 21.5-8.62 12.82 0 21.32 8.62 8.5 8.63 8.5 21.38v341l99-99q8.8-9 20.9-8.5 12.1.5 21.49 9.5 8.61 9 8.61 21.5t-9 21.5L501-334q-5 5-10.13 7-5.14 2-11 2-5.87 0-10.87-2ZM220-160q-24 0-42-18t-18-42v-113q0-12.75 8.68-21.38 8.67-8.62 21.5-8.62 12.82 0 21.32 8.62 8.5 8.63 8.5 21.38v113h520v-113q0-12.75 8.68-21.38 8.67-8.62 21.5-8.62 12.82 0 21.32 8.62 8.5 8.63 8.5 21.38v113q0 24-18 42t-42 18H220Z"/></symbol><symbol id="i-lock" viewBox="0 -960 960 960"><path d="M220-80q-24.75 0-42.37-17.63Q160-115.25 160-140v-434q0-24.75 17.63-42.38Q195.25-634 220-634h70v-96q0-78.85 55.61-134.42Q401.21-920 480.11-920q78.89 0 134.39 55.58Q670-808.85 670-730v96h70q24.75 0 42.38 17.62Q800-598.75 800-574v434q0 24.75-17.62 42.37Q764.75-80 740-80H220Zm0-60h520v-434H220v434Zm314.5-162.03Q557-324.06 557-355q0-30-22.67-54.5t-54.5-24.5q-31.83 0-54.33 24.5t-22.5 55q0 30.5 22.67 52.5t54.5 22q31.83 0 54.33-22.03ZM350-634h260v-96q0-54.17-37.88-92.08-37.88-37.92-92-37.92T388-822.08q-38 37.91-38 92.08v96ZM220-140v-434 434Z"/></symbol><symbol id="i-info" viewBox="0 -960 960 960"><path d="M504.5-288.63q8.5-8.62 8.5-21.37v-180q0-12.75-8.68-21.38-8.67-8.62-21.5-8.62-12.82 0-21.32 8.62-8.5 8.63-8.5 21.38v180q0 12.75 8.68 21.37 8.67 8.63 21.5 8.63 12.82 0 21.32-8.63Zm-1-314.57q9.5-9.2 9.5-22.8 0-14.45-9.48-24.22-9.48-9.78-23.5-9.78t-23.52 9.78Q447-640.45 447-626q0 13.6 9.48 22.8 9.48 9.2 23.5 9.2t23.52-9.2ZM480.27-80q-82.74 0-155.5-31.5Q252-143 197.5-197.5t-86-127.34Q80-397.68 80-480.5t31.5-155.66Q143-709 197.5-763t127.34-85.5Q397.68-880 480.5-880t155.66 31.5Q709-817 763-763t85.5 127Q880-563 880-480.27q0 82.74-31.5 155.5Q817-252 763-197.68q-54 54.31-127 86Q563-80 480.27-80Zm.23-60Q622-140 721-239.5t99-241Q820-622 721.19-721T480-820q-141 0-240.5 98.81T140-480q0 141 99.5 240.5t241 99.5Zm-.5-340Z"/></symbol></svg>
 
-      <h3>Features</h3>
-      <ul>
-        <li>Auto-generate a QR for the active tab when you open the extension</li>
-        <li>Editable input field — change text/URL and the QR updates live</li>
-        <li>Copy QR image to clipboard or download as PNG</li>
-        <li>Generates QR codes locally — no external servers</li>
-      </ul>
+    <header class="wrap bar">
+      <img src="logo.svg" alt="" width="28" height="28" />
+      <span>QR CODE</span>
+    </header>
 
-      <div class="actions">
-        <a class="button" href="Archive.zip" download>Download ZIP (extension files)</a>
-        <a class="secondary" href="chrome-qr-code.crx">Download CRX (if available)</a>
-      </div>
+    <main class="wrap">
+      <section class="hero">
+        <div>
+          <h1>QR CODE</h1>
+          <p class="lead">Generate a QR code for the current page or any custom text instantly. Minimal, local, and fast.</p>
+          <div class="actions">
+            <a class="btn btn-filled" href="Archive.zip" download>
+              <svg aria-hidden="true"><use href="#i-download" /></svg>
+              Download ZIP
+            </a>
+            <a class="btn btn-outlined" href="chrome-qr-code.crx">Download CRX</a>
+          </div>
+        </div>
+        <figure class="shot">
+          <img src="preview.webp" width="1280" height="800" fetchpriority="high" alt="The QR CODE popup in light and dark theme, with a QR code above the text field and the Copy and Download buttons." />
+        </figure>
+      </section>
 
-      <p class="note">Note: The ZIP contains the built extension files ready to be used as unpacked extension. If you have a `.crx` file, place it alongside this page before building and the CRX link will work.</p>
-    </div>
+      <section class="features" aria-labelledby="features">
+        <h2 id="features">Features</h2>
+        <ul class="grid">
+          <li>
+            <span class="glyph"><svg aria-hidden="true"><use href="#i-tab" /></svg></span>
+            <p>Auto-generate a QR for the active tab when you open the extension.</p>
+          </li>
+          <li>
+            <span class="glyph"><svg aria-hidden="true"><use href="#i-edit_note" /></svg></span>
+            <p>Editable input field. Change the text or URL and the QR updates live.</p>
+          </li>
+          <li>
+            <span class="glyph"><svg aria-hidden="true"><use href="#i-download" /></svg></span>
+            <p>Copy the QR image to the clipboard or download it as a PNG.</p>
+          </li>
+          <li>
+            <span class="glyph"><svg aria-hidden="true"><use href="#i-lock" /></svg></span>
+            <p>Generates QR codes locally. No external servers.</p>
+          </li>
+        </ul>
+
+        <aside class="note">
+          <svg aria-hidden="true"><use href="#i-info" /></svg>
+          <p>The ZIP contains the built extension files, ready to use as an unpacked extension. If you have a <code>.crx</code> file, place it alongside this page before building and the CRX link will work.</p>
+        </aside>
+      </section>
+    </main>
   </body>
 </html>

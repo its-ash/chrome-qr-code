@@ -1,12 +1,13 @@
 import { defineConfig } from 'vite'
-import { resolve } from 'path'
+import { fileURLToPath } from 'node:url'
 
 export default defineConfig({
   build: {
+    target: 'chrome120',
     rollupOptions: {
       input: {
-        popup: resolve(__dirname, 'popup.html')
-      }
-    }
-  }
+        popup: fileURLToPath(new URL('popup.html', import.meta.url)),
+      },
+    },
+  },
 })
