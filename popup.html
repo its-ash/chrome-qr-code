@@ -8,41 +8,99 @@
     <link rel="stylesheet" href="/src/styles/tailwind.css" />
   </head>
   <body>
-    <main class="popup" aria-labelledby="title">
+    <main id="popup" class="popup" data-panel="closed" aria-labelledby="title">
       <header class="popup-head">
         <img src="/icons/logo.svg" alt="" width="24" height="24" />
         <h1 id="title">QR code</h1>
+        <md-icon-button
+          id="styleBtn"
+          toggle
+          aria-label="Show style options"
+          aria-label-selected="Hide style options"
+          aria-controls="stylePanel"
+        >
+          <md-icon data-icon="tune"></md-icon>
+          <md-icon slot="selected" data-icon="close"></md-icon>
+        </md-icon-button>
       </header>
 
-      <section class="stage" aria-label="QR code preview">
-        <div id="qrcode" class="tile" data-state="loading">
-          <canvas id="qrCanvas" role="img" aria-label="QR code"></canvas>
-          <div class="tile-msg" id="tileMsg" hidden>
-            <md-icon data-icon="qr_code_2" id="tileIcon"></md-icon>
-            <p id="tileText">Enter text or a link to make a code.</p>
+      <div class="col">
+        <section class="stage" aria-label="QR code preview">
+          <div id="qrcode" class="tile" data-state="loading">
+            <canvas id="qrCanvas" role="img" aria-label="QR code"></canvas>
+            <div class="tile-msg" id="tileMsg" hidden>
+              <md-icon data-icon="qr_code_2" id="tileIcon"></md-icon>
+              <p id="tileText">Enter text or a link to make a code.</p>
+            </div>
           </div>
+        </section>
+
+        <md-outlined-text-field
+          id="text"
+          class="field"
+          label="Text or URL"
+          error-text="Shorten the text to fit in a QR code."
+          autocomplete="off"
+          spellcheck="false"
+        ></md-outlined-text-field>
+
+        <div class="actions">
+          <md-outlined-button id="copyBtn" has-icon disabled>
+            <md-icon slot="icon" data-icon="content_copy"></md-icon>
+            <span id="copyLabel">Copy</span>
+          </md-outlined-button>
+          <md-filled-button id="downloadBtn" has-icon disabled>
+            <md-icon slot="icon" data-icon="download"></md-icon>
+            <span id="downloadLabel">Download PNG</span>
+          </md-filled-button>
         </div>
-      </section>
-
-      <md-outlined-text-field
-        id="text"
-        class="field"
-        label="Text or URL"
-        error-text="Shorten the text to fit in a QR code."
-        autocomplete="off"
-        spellcheck="false"
-      ></md-outlined-text-field>
-
-      <div class="actions">
-        <md-outlined-button id="copyBtn" has-icon disabled>
-          <md-icon slot="icon" data-icon="content_copy"></md-icon>
-          <span id="copyLabel">Copy</span>
-        </md-outlined-button>
-        <md-filled-button id="downloadBtn" has-icon disabled>
-          <md-icon slot="icon" data-icon="download"></md-icon>
-          Download
-        </md-filled-button>
       </div>
+
+      <aside id="stylePanel" class="panel" aria-labelledby="styleTitle" hidden>
+        <h2 id="styleTitle">Style</h2>
+
+        <fieldset class="swatches">
+          <legend>Color</legend>
+          <div class="swatch-row">
+            <input type="radio" name="color" value="#1f1f1f" aria-label="Ink" style="--c: #1f1f1f" />
+            <input type="radio" name="color" value="#0b57d0" aria-label="Blue" style="--c: #0b57d0" />
+            <input type="radio" name="color" value="#b3261e" aria-label="Red" style="--c: #b3261e" />
+            <input type="radio" name="color" value="#8a5100" aria-label="Amber" style="--c: #8a5100" />
+            <input type="radio" name="color" value="#146c2e" aria-label="Green" style="--c: #146c2e" />
+            <label id="customSwatch" class="swatch-custom" title="Custom color">
+              <input type="color" id="customColor" value="#5e3fbe" aria-label="Custom color" />
+            </label>
+          </div>
+          <p id="contrastHint" class="hint hint-warn" hidden>Low contrast. Some phones may not scan this code.</p>
+        </fieldset>
+
+        <md-outlined-select id="level" label="Error correction">
+          <md-select-option value="L"><div slot="headline">Low (7%)</div></md-select-option>
+          <md-select-option value="M"><div slot="headline">Medium (15%)</div></md-select-option>
+          <md-select-option value="Q"><div slot="headline">Quartile (25%)</div></md-select-option>
+          <md-select-option value="H"><div slot="headline">High (30%)</div></md-select-option>
+        </md-outlined-select>
+
+        <md-outlined-select id="size" label="Export size">
+          <md-select-option value="256"><div slot="headline">256 px</div></md-select-option>
+          <md-select-option value="512"><div slot="headline">512 px</div></md-select-option>
+          <md-select-option value="1024"><div slot="headline">1024 px</div></md-select-option>
+          <md-select-option value="2048"><div slot="headline">2048 px</div></md-select-option>
+        </md-outlined-select>
+
+        <md-outlined-select id="format" label="File format">
+          <md-select-option value="png"><div slot="headline">PNG</div></md-select-option>
+          <md-select-option value="svg"><div slot="headline">SVG</div></md-select-option>
+        </md-outlined-select>
+
+        <label class="switch-row">
+          <span class="switch-text">
+            <span>Center dots</span>
+            <span id="dotsHint" class="hint" hidden>Needs Quartile or High</span>
+          </span>
+          <md-switch id="dots"></md-switch>
+        </label>
+      </aside>
 
       <p id="status" class="sr-only" aria-live="polite"></p>
     </main>

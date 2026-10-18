@@ -11,6 +11,7 @@ What it does
 - Generates a QR for the active tab URL when you open the popup.
 - Provides an editable input so you can generate a QR from any text or URL.
 - Lets you copy the QR image to clipboard or download it as a PNG.
+- Style panel: pick the QR color, error correction level, export size (256 to 2048 px), and center dots. Download as PNG or SVG. Choices are saved in the popup's local storage, so no extra permission is needed.
 - No analytics, telemetry, or external network requests — everything runs locally.
 
 Permissions
