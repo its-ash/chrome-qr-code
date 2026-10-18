@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "QR CODE",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Generate QR code of current page or custom input",
   "action": {
     "default_popup": "popup.html",
